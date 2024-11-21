@@ -1,0 +1,42 @@
+
+h1, h2 {
+    font-weight: bold;
+    color: #343a40; /* Color gris oscuro */
+}
+.section-title {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #343a40; /* Línea debajo del título */
+    padding-bottom: 0.5rem;
+}
+/* Estilos generales */
+body {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+#sidebar {
+    width: 220px;
+    background-color: #343a40;
+    color: #ffffff;
+    padding-top: 20px;
+}
+#sidebar .nav-link {
+    color: #ffffff;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}
+#sidebar .nav-link:hover,
+#sidebar .nav-link.active {
+    background-color: #495057;
+    color: #ffffff;
+}
+main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+.tooltip-inner {
+    background-color: #495057;
+    color: #ffffff;
+}
