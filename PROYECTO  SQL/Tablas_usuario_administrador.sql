@@ -140,35 +140,60 @@ GRANT UPDATE ON productos TO USUARIO_VENDEDOR;
 -- Este procedimiento permite actualizar el inventario de un producto. Si ya existe un registro para el producto 
 -- y proveedor, incrementa la cantidad. De lo contrario, inserta un nuevo registro.
 CREATE OR REPLACE PROCEDURE PA_ActualizarInventario (
-    p_id_producto IN NUMBER,     -- ID del producto
-    p_cantidad IN NUMBER,        -- Cantidad a agregar al inventario
-    p_id_proveedor IN NUMBER     -- ID del proveedor
+    p_id_producto IN NUMBER,     
+    p_cantidad IN NUMBER,        
+    p_id_proveedor IN NUMBER    
 ) AS
-    p_existente NUMBER;          -- Variable para verificar si ya existe el registro
+    p_existente NUMBER;          
 BEGIN
-    -- Verificar si ya existe un registro para el producto y proveedor
+    
     SELECT COUNT(*)
     INTO p_existente
     FROM inventario
     WHERE id_producto = p_id_producto AND id_proveedor_ref = p_id_proveedor;
 
     IF p_existente > 0 THEN
-        -- Si existe, actualizar la cantidad en el inventario
+       
         UPDATE inventario
         SET cantidad = cantidad + p_cantidad
         WHERE id_producto = p_id_producto AND id_proveedor_ref = p_id_proveedor;
     ELSE
-        -- Si no existe, insertar un nuevo registro
+      
         INSERT INTO inventario (id_producto, cantidad, id_proveedor_ref)
         VALUES (p_id_producto, p_cantidad, p_id_proveedor);
     END IF;
 
-    -- Actualizar la cantidad en stock en la tabla `productos`
+    
     UPDATE productos
     SET cantidad_en_stock = cantidad_en_stock + p_cantidad
     WHERE id_producto = p_id_producto;
 
-    -- Confirmar la transacción
+
     COMMIT;
 END;
+/
+
+-- **Funcion: 3.Obtener Inventario Disponible **
+-- Esta función calcula el inventario total disponible para un producto específico. 
+-- Recibe como parámetro el identificador del producto (p_id_producto) y retorna la 
+-- suma de las cantidades registradas en la tabla `inventario` para ese producto.
+-- Si no existen registros para el producto, retorna 0.
+
+CREATE OR REPLACE FUNCTION FN_ObtenerInventarioDisponible (
+    p_id_producto IN NUMBER
+) RETURN NUMBER AS
+    v_inventario_disponible NUMBER; 
+BEGIN
+
+    v_inventario_disponible := 0;
+
+  
+    SELECT NVL(SUM(cantidad), 0)
+    INTO v_inventario_disponible
+    FROM inventario
+    WHERE id_producto = p_id_producto;
+
+   
+    RETURN v_inventario_disponible;
+END FN_ObtenerInventarioDisponible;
 /

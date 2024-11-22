@@ -121,9 +121,9 @@ GRANT SELECT ON usuario_vendedor.factura TO usuario_contador;
 CREATE OR REPLACE FUNCTION FN_CalcularDescuento (
     total IN NUMBER -- Total de la compra
 ) RETURN NUMBER AS
-    total_con_descuento NUMBER;                  -- Total con descuento aplicado
-    porcentaje_descuento CONSTANT NUMBER := 0.05; -- Porcentaje de descuento
-    limite_del_total CONSTANT NUMBER := 10000;   -- Límite para aplicar el descuento
+    total_con_descuento NUMBER;                 
+    porcentaje_descuento CONSTANT NUMBER := 0.05; 
+    limite_del_total CONSTANT NUMBER := 10000;  
 BEGIN
     IF total > limite_del_total THEN
         total_con_descuento := total - (total * porcentaje_descuento);
@@ -136,3 +136,60 @@ END;
 /
 
 
+
+-- **PROCEDIMIENTO: Registrar Venta**
+/*Este procedimiento registra una venta en la base de datos. Realiza lo siguiente:
+Verifica si hay suficiente stock disponible para el producto que se está vendiendo.
+Si el stock es suficiente, inserta un nuevo registro en la tabla factura, actualiza la cantidad en stock del producto vendido y confirma la transacción.
+Si no hay suficiente stock, muestra un mensaje de error indicando que el producto no tiene suficiente inventario.*/
+
+
+GRANT INSERT ON factura TO usuario_vendedor;
+
+CREATE OR REPLACE PROCEDURE procRegistrarVenta (
+    rCFactura IN factura%ROWTYPE 
+) AS
+    
+    vStockActual NUMBER;       
+    pudoRegistrar NUMBER := 0; 
+BEGIN
+    
+    SELECT cantidad_en_stock 
+    INTO vStockActual
+    FROM productos
+    WHERE id_producto = rCFactura.id_producto;
+
+ 
+    IF vStockActual >= rCFactura.cantidad THEN
+     
+        INSERT INTO factura (
+            id_factura, detalle, cantidad, total, fecha, id_producto, id_cliente, id_metodo_pago, id_sucursal
+        ) VALUES (
+            rCFactura.id_factura, 
+            rCFactura.detalle, 
+            rCFactura.cantidad, 
+            rCFactura.total, 
+            rCFactura.fecha, 
+            rCFactura.id_producto, 
+            rCFactura.id_cliente, 
+            rCFactura.id_metodo_pago, 
+            rCFactura.id_sucursal
+        );
+
+      
+        UPDATE productos
+        SET cantidad_en_stock = cantidad_en_stock - rCFactura.cantidad
+        WHERE id_producto = rCFactura.id_producto;
+
+        pudoRegistrar := 1; 
+    END IF;
+
+    IF pudoRegistrar = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Stock insuficiente para el producto: ' || rCFactura.id_producto);
+    ELSE
+        
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Venta registrada exitosamente con ID: ' || rCFactura.id_factura);
+    END IF;
+END procRegistrarVenta;
+/
