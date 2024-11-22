@@ -129,3 +129,46 @@ VALUES (8, 8, 60, '20/10/24 18:00:00', 8, 8);
 
 INSERT INTO inventario (id_inventario, id_proveedor, cantidad, fecha_orden_de_compra, id_producto, id_proveedor_ref) 
 VALUES (9, 9, 40, '25/10/24 10:00:00', 9, 9);
+
+
+-- **ASIGNACIÓN DE PERMISOS**
+-- Otorgar permisos a los usuarios para realizar actualizaciones en la tabla `productos`
+GRANT UPDATE ON productos TO USUARIO_ADMINISTRADOR;
+GRANT UPDATE ON productos TO USUARIO_VENDEDOR;
+
+-- **PROCEDIMIENTO: Actualizar Inventario**
+-- Este procedimiento permite actualizar el inventario de un producto. Si ya existe un registro para el producto 
+-- y proveedor, incrementa la cantidad. De lo contrario, inserta un nuevo registro.
+CREATE OR REPLACE PROCEDURE PA_ActualizarInventario (
+    p_id_producto IN NUMBER,     -- ID del producto
+    p_cantidad IN NUMBER,        -- Cantidad a agregar al inventario
+    p_id_proveedor IN NUMBER     -- ID del proveedor
+) AS
+    p_existente NUMBER;          -- Variable para verificar si ya existe el registro
+BEGIN
+    -- Verificar si ya existe un registro para el producto y proveedor
+    SELECT COUNT(*)
+    INTO p_existente
+    FROM inventario
+    WHERE id_producto = p_id_producto AND id_proveedor_ref = p_id_proveedor;
+
+    IF p_existente > 0 THEN
+        -- Si existe, actualizar la cantidad en el inventario
+        UPDATE inventario
+        SET cantidad = cantidad + p_cantidad
+        WHERE id_producto = p_id_producto AND id_proveedor_ref = p_id_proveedor;
+    ELSE
+        -- Si no existe, insertar un nuevo registro
+        INSERT INTO inventario (id_producto, cantidad, id_proveedor_ref)
+        VALUES (p_id_producto, p_cantidad, p_id_proveedor);
+    END IF;
+
+    -- Actualizar la cantidad en stock en la tabla `productos`
+    UPDATE productos
+    SET cantidad_en_stock = cantidad_en_stock + p_cantidad
+    WHERE id_producto = p_id_producto;
+
+    -- Confirmar la transacción
+    COMMIT;
+END;
+/

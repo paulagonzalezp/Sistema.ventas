@@ -33,6 +33,8 @@ CREATE TABLE reportes_financieros (
 GRANT REFERENCES ON clientes TO usuario_vendedor;
 GRANT REFERENCES ON clientes TO usuario_administrador;
 
+
+
 --**INSERT DE LAS TABLAS CONTADOR **--
 
 
@@ -83,3 +85,96 @@ VALUES (4, 104, 50000.00, 104);
 
 INSERT INTO reportes_financieros (id_reporte, id_factura, total_ventas, id_factura_ref) 
 VALUES (5, 105, 30000.00, 105);
+
+
+
+
+-- **ASIGNACIÓN DE PERMISOS**
+
+-- Permisos para el procedimiento de generar reporte financiero
+GRANT INSERT, SELECT ON reportes_financieros TO usuario_administrador;
+GRANT INSERT, SELECT ON reportes_financieros TO usuario_vendedor;
+
+-- Permisos para la función de calcular total de ventas por producto
+GRANT EXECUTE ON calcular_total_ventas_por_producto TO usuario_contador;
+
+-- Permisos específicos sobre tablas relacionadas con clientes
+GRANT SELECT ON usuario_contador.clientes TO usuario_vendedor;
+GRANT SELECT ON clientes TO usuario_vendedor;
+
+-- Permisos adicionales para facturas
+GRANT SELECT ON factura TO usuario_contador;
+GRANT SELECT ON factura TO usuario_administrador;
+GRANT SELECT ON usuario_vendedor.factura TO usuario_contador;
+GRANT INSERT ON factura TO usuario_vendedor;
+GRANT SELECT, INSERT ON factura TO usuario_vendedor;
+
+
+-- **PROCEDIMIENTOS **
+
+-- **Procedimiento: Generar Reporte Financiero Mensual**
+-- Este procedimiento calcula el total de ventas para un mes y año específicos,
+-- genera un nuevo ID para el reporte, e inserta los datos en la tabla `reportes_financieros`.
+CREATE OR REPLACE PROCEDURE GENERAR_REPORTE_FINANCIERO (
+    p_mes IN NUMBER,  
+    p_ano IN NUMBER   
+) AS
+    v_total_ventas NUMBER(10, 2); -- Variable para almacenar el total de ventas calculado
+    v_id_reporte NUMBER;         -- Variable para almacenar el nuevo ID del reporte
+BEGIN
+    -- Calcular el total de ventas del mes y año proporcionados
+    SELECT NVL(SUM(total), 0) 
+    INTO v_total_ventas
+    FROM usuario_vendedor.factura
+    WHERE EXTRACT(MONTH FROM fecha) = p_mes
+      AND EXTRACT(YEAR FROM fecha) = p_ano;
+
+    -- Generar un nuevo ID para el reporte
+    SELECT NVL(MAX(id_reporte), 0) + 1
+    INTO v_id_reporte
+    FROM reportes_financieros;
+
+    -- Insertar el reporte financiero en la tabla
+    INSERT INTO reportes_financieros (id_reporte, fecha_reporte, total_ventas)
+    VALUES (v_id_reporte, SYSTIMESTAMP, v_total_ventas);
+
+    -- Confirmar la transacción
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Reporte generado exitosamente con ID: ' || v_id_reporte);
+EXCEPTION
+    WHEN OTHERS THEN
+        -- En caso de error, deshacer la transacción y mostrar un mensaje
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Ocurrió un error: ' || SQLERRM);
+END GENERAR_REPORTE_FINANCIERO;
+/
+
+-- Ejecución de ejemplo del procedimiento
+BEGIN
+    GENERAR_REPORTE_FINANCIERO(11, 2024); -- Generar reporte de noviembre de 2024
+END;
+/
+
+-- Consultar los reportes generados
+SELECT * FROM reportes_financieros;
+
+-- **Función: Calcular Total de Ventas por Producto**
+-- Esta función devuelve el total de ventas para un producto específico.
+CREATE OR REPLACE FUNCTION calcular_total_ventas_por_producto (
+    p_id_producto IN NUMBER  -- ID del producto para el cual calcular el total de ventas
+) RETURN NUMBER AS
+    v_total_ventas NUMBER(10, 2);  -- Variable para almacenar el total de ventas
+BEGIN
+    -- Calcular el total de ventas para el producto proporcionado
+    SELECT SUM(f.total)
+    INTO v_total_ventas
+    FROM usuario_vendedor.factura f
+    WHERE f.id_producto = p_id_producto;  -- Filtrar por el ID del producto
+
+    -- Retornar el total de ventas o 0 si no existen ventas
+    RETURN NVL(v_total_ventas, 0);
+END calcular_total_ventas_por_producto;
+/
+
+-- Ejecución de ejemplo de la función
+SELECT calcular_total_ventas_por_producto(101) FROM DUAL;

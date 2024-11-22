@@ -1,57 +1,80 @@
--- PROCEDIMIENTOS
+-----------------------*PROCEDIMIENTOS*----------------------------------- 
 
------------------------*USUARIO VENDEDOR*----------------------------------- 
--- Prodecimiento de registrar Nueva Venta 
-/*
-Procedimiento que, al realizar una venta, inserte un nuevo registro
- en la tabla factura con el detalle de la compra y actualice la cantidad de 
- producto en stock en la tabla productos.
-*/
-CREATE OR REPLACE PROCEDURE registrarNuevaVenta (
-    p_id_producto IN NUMBER,
-    p_cantidad IN NUMBER,
-    p_id_cliente IN NUMBER,
-    p_id_metodo_pago IN NUMBER,
-    p_id_sucursal IN NUMBER
+-----------------------*USUARIO ADMINISTRADOR*----------------------------------- 
+-- **PROCEDIMIENTO: Actualizar Inventario**
+--Este procedimiento permite actualizar el inventario de un producto. Si ya existe un registro para el 
+--producto y proveedor, incrementa la cantidad. De lo contrario, inserta un nuevo registro.
+CREATE OR REPLACE PROCEDURE PA_ActualizarInventario (
+    p_id_producto IN NUMBER,    
+    p_cantidad IN NUMBER,        
+    p_id_proveedor IN NUMBER    
 ) AS
-    -- Variables locales
-    v_precio_unitario productos.precio%TYPE;
-    v_total NUMBER;
-    v_id_factura NUMBER;
+    p_existente NUMBER;         
 BEGIN
-    -- Obtener el precio del producto
-    SELECT precio
-    INTO v_precio_unitario
-    FROM productos
-    WHERE id_producto = p_id_producto;
     
-    -- Calcular el total de la venta
-    v_total := v_precio_unitario * p_cantidad;
+    SELECT COUNT(*)
+    INTO p_existente
+    FROM inventario
+    WHERE id_producto = p_id_producto AND id_proveedor_ref = p_id_proveedor;
 
-    -- Insertar el registro de la factura
-    INSERT INTO factura (id_cliente, fecha, total, id_metodo_pago, id_sucursal)
-    VALUES (p_id_cliente, SYSDATE, v_total, p_id_metodo_pago, p_id_sucursal)
-    RETURNING id_factura INTO v_id_factura;
+    IF p_existente > 0 THEN
+      
+        UPDATE inventario
+        SET cantidad = cantidad + p_cantidad
+        WHERE id_producto = p_id_producto AND id_proveedor_ref = p_id_proveedor;
+    ELSE
+        
+        INSERT INTO inventario (id_producto, cantidad, id_proveedor_ref)
+        VALUES (p_id_producto, p_cantidad, p_id_proveedor);
+    END IF;
 
-    -- Insertar el detalle de la factura
-    INSERT INTO detalle_factura (id_factura, id_producto, cantidad, precio_unitario)
-    VALUES (v_id_factura, p_id_producto, p_cantidad, v_precio_unitario);
-
-    -- Actualizar la cantidad en stock del producto
+   
     UPDATE productos
-    SET cantidad_en_stock = cantidad_en_stock - p_cantidad
+    SET cantidad_en_stock = cantidad_en_stock + p_cantidad
     WHERE id_producto = p_id_producto;
 
-    -- Confirmar transacción
+   
     COMMIT;
+END;
+/
 
+
+-----------------------*USUARIO CONTADOR*----------------------------------- 
+
+-- **PROCEDIMIENTO: Generar Reporte Financiero Mensual**
+--Este procedimiento calcula el total de ventas para un mes y año específicos, genera un nuevo ID para el 
+--reporte e inserta los datos en la tabla reportes_financieros.
+
+CREATE OR REPLACE PROCEDURE GENERAR_REPORTE_FINANCIERO (
+    p_mes IN NUMBER,            
+    p_ano IN NUMBER            
+) AS
+    v_total_ventas NUMBER(10, 2); 
+    v_id_reporte NUMBER;      
+BEGIN
+    
+    SELECT NVL(SUM(total), 0) 
+    INTO v_total_ventas
+    FROM usuario_vendedor.factura
+    WHERE EXTRACT(MONTH FROM fecha) = p_mes
+      AND EXTRACT(YEAR FROM fecha) = p_ano;
+
+
+    SELECT NVL(MAX(id_reporte), 0) + 1
+    INTO v_id_reporte
+    FROM reportes_financieros;
+
+   
+    INSERT INTO reportes_financieros (id_reporte, fecha_reporte, total_ventas)
+    VALUES (v_id_reporte, SYSTIMESTAMP, v_total_ventas);
+
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Reporte generado exitosamente con ID: ' || v_id_reporte);
 EXCEPTION
-    -- Manejo de errores
-    WHEN NO_DATA_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('Error: Producto no encontrado.');
-        ROLLBACK;
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        
         ROLLBACK;
-END registrarNuevaVenta;
+        DBMS_OUTPUT.PUT_LINE('Ocurrió un error: ' || SQLERRM);
+END GENERAR_REPORTE_FINANCIERO;
 /

@@ -103,3 +103,36 @@ VALUES (4, 'Ana Rodríguez', 'ana@tienda.com', '2222-9999', 'Calle 4, Heredia', 
 
 INSERT INTO empleados (id_empleado, nombre, email, telefono, direccion, id_sucursal) 
 VALUES (5, 'Luis Martínez', 'luis@tienda.com', '2222-1010', 'Calle 5, Guanacaste', 5);
+
+
+
+-- **ASIGNACIÓN DE PERMISOS**
+-- Permisos para usuarios sobre la tabla `factura` y operaciones relacionadas
+GRANT SELECT, UPDATE ON factura TO usuario_administrador;
+GRANT SELECT ON factura TO usuario_vendedor;
+GRANT INSERT ON factura TO usuario_vendedor;
+GRANT INSERT ON factura TO usuario_administrador;
+GRANT SELECT ON factura TO usuario_contador;
+GRANT SELECT ON usuario_vendedor.factura TO usuario_contador;
+
+-- **FUNCIÓN: Calcular Descuento**
+-- Esta función calcula un descuento del 5% si el total de la compra supera los 10,000. 
+-- De lo contrario, retorna el mismo valor sin descuento.
+CREATE OR REPLACE FUNCTION FN_CalcularDescuento (
+    total IN NUMBER -- Total de la compra
+) RETURN NUMBER AS
+    total_con_descuento NUMBER;                  -- Total con descuento aplicado
+    porcentaje_descuento CONSTANT NUMBER := 0.05; -- Porcentaje de descuento
+    limite_del_total CONSTANT NUMBER := 10000;   -- Límite para aplicar el descuento
+BEGIN
+    IF total > limite_del_total THEN
+        total_con_descuento := total - (total * porcentaje_descuento);
+    ELSE
+        total_con_descuento := total;
+    END IF;
+
+    RETURN total_con_descuento;
+END;
+/
+
+

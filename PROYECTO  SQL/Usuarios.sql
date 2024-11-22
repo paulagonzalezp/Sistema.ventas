@@ -23,6 +23,24 @@ CREATE USER usuario_contador IDENTIFIED BY usuario_contador
 GRANT CREATE SESSION, CREATE TABLE TO usuario_contador;
 
 
+--Permisos globales para creacion de procedimientos (PARA LA CREACION DE PRODECIMIENTOS)USUARIO SYS
+GRANT CREATE PROCEDURE TO usuario_administrador;
+GRANT CREATE PROCEDURE TO usuario_contador;
+GRANT CREATE VIEW TO usuario_administrador; -- Si usas vistas en el procedimiento
+
+--**permisos para usuario administrador triggers
+GRANT CREATE TRIGGER TO usuario_administrador;--NUEVO PERMIRSO*********************************
+GRANT CREATE ANY TRIGGER TO usuario_administrador;--NUEVO PERMIRSO*********************************
+GRANT ALTER ANY TRIGGER TO usuario_administrador;--NUEVO PERMIRSO*********************************
+GRANT EXECUTE ANY PROCEDURE TO usuario_administrador;--NUEVO PERMIRSO*********************************
+
+
+--Permisos usuario vendedor trigger--
+GRANT CREATE PROCEDURE TO usuario_vendedor;--NUEVO PERMISO*********************************
+GRANT CREATE TRIGGER TO USUARIO_VENDEDOR;--NUEVO PERMISO*********************************
+
+
+
 -- Consultas para verificar los privilegios y configuración de los usuarios
 
 -- Verificar la configuración de los usuarios
