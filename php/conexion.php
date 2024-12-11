@@ -1,10 +1,10 @@
 <?php
 // Parámetros de conexión a Oracle
-$usuario = 'TU_USUARIO';
-$contraseña = 'TU_CONTRASEÑA';
 $host = 'localhost';  // O el host de tu servidor Oracle
 $puerto = '1521';     // El puerto de Oracle (usualmente 1521)
-$nombre_bd = 'TU_BASE_DE_DATOS';
+$dbname = 'orcl';
+$user = '';
+$password = '1234';
 
 // Crear la conexión
 $conn = oci_connect($usuario, $contraseña, "//{$host}:{$puerto}/{$nombre_bd}");
