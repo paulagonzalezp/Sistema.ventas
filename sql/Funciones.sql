@@ -1,7 +1,7 @@
 -----------------------*FUNCIONES*----------------------------------- 
 
 
-FUNCIÓN: Calcular el Total de Ventas Diarias (Usuario: usuario_contador)
+FUNCIÓN: Calcular el Total de Ventas Diarias (Usuario: usuario_contador)(Paula)
 /*Esta función calcula el total de ventas realizadas en una fecha específica. 
 Realiza lo siguiente:
 1. Recibe como parámetro una fecha.
@@ -10,7 +10,7 @@ Realiza lo siguiente:
 
 
 
-FUNCIÓN: Verificar Disponibilidad de Inventario (Usuario: usuario_vendedor)
+FUNCIÓN: Verificar Disponibilidad de Inventario (Usuario: usuario_vendedor)(Paula)
 /*Esta función verifica si hay suficiente inventario para realizar una venta. 
 Realiza lo siguiente:
 1.Recibe como parámetros el id_producto y la cantidad requerida.

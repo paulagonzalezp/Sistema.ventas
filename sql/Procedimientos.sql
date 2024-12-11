@@ -14,7 +14,7 @@ que no es posible procesar la venta debido a falta de stock.*/
 
 
 
-PROCEDIMIENTO: Registrar Nueva Sucursal (Usuario: usuario_administrador)
+PROCEDIMIENTO: Registrar Nueva Sucursal (Usuario: usuario_administrador) (Paula)
 /*Este procedimiento registra una nueva sucursal en la tabla sucursales. 
 Realiza lo siguiente:
 1. Verifica que la provincia y el teléfono cumplan con los formatos requeridos.
@@ -58,7 +58,7 @@ Realiza lo siguiente:
 
 
 
-PROCEDIMIENTO: Actualizar Precios de Productos por Categoría (Usuario: usuario_administrador)
+PROCEDIMIENTO: Actualizar Precios de Productos por Categoría (Usuario: usuario_administrador) (Paula)
 /*Este procedimiento ajusta los precios de los productos pertenecientes a una categoría específica. Realiza lo siguiente:
 1. Recibe como parámetros el id_categoria y un porcentaje de ajuste.
 2. Actualiza el precio de todos los productos en esa categoría según el porcentaje indicado.

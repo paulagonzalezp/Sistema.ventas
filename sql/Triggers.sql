@@ -1,6 +1,6 @@
 -----------------------*TRIGGER*----------------------------------- 
 
-TRIGGER: Actualizar Fecha de Última Modificación en Productos (Usuario: usuario_administrador)
+TRIGGER: Actualizar Fecha de Última Modificación en Productos (Usuario: usuario_administrador)(Paula)
 /*Este trigger actualiza un campo ultima_modificacion en la tabla productos cada vez que se realiza un cambio en los datos del producto. 
 Realiza lo siguiente:
 1. Se activa en una operación de UPDATE sobre la tabla productos.
@@ -33,7 +33,7 @@ Realiza lo siguiente:
 
 
 
-TRIGGER: Registrar Historial de Cambios en Precios (Usuario: usuario_administrador)
+TRIGGER: Registrar Historial de Cambios en Precios (Usuario: usuario_administrador) (Paula)
 /*Este trigger guarda un registro en una tabla de historial cada vez que se modifica el precio de un producto. 
 Realiza lo siguiente:
 1. Se activa en operaciones de UPDATE sobre la columna precio de la tabla productos.
