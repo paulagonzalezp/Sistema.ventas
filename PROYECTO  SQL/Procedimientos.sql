@@ -1,141 +1,65 @@
 -----------------------*PROCEDIMIENTOS*----------------------------------- 
 
------------------------*USUARIO ADMINISTRADOR*----------------------------------- 
--- **PROCEDIMIENTO: Actualizar Inventario**
---Este procedimiento permite actualizar el inventario de un producto. Si ya existe un registro para el 
---producto y proveedor, incrementa la cantidad. De lo contrario, inserta un nuevo registro.
-CREATE OR REPLACE PROCEDURE PA_ActualizarInventario (
-    p_id_producto IN NUMBER,    
-    p_cantidad IN NUMBER,        
-    p_id_proveedor IN NUMBER    
-) AS
-    p_existente NUMBER;         
-BEGIN
-    
-    SELECT COUNT(*)
-    INTO p_existente
-    FROM inventario
-    WHERE id_producto = p_id_producto AND id_proveedor_ref = p_id_proveedor;
 
-    IF p_existente > 0 THEN
-      
-        UPDATE inventario
-        SET cantidad = cantidad + p_cantidad
-        WHERE id_producto = p_id_producto AND id_proveedor_ref = p_id_proveedor;
-    ELSE
-        
-        INSERT INTO inventario (id_producto, cantidad, id_proveedor_ref)
-        VALUES (p_id_producto, p_cantidad, p_id_proveedor);
-    END IF;
-
-   
-    UPDATE productos
-    SET cantidad_en_stock = cantidad_en_stock + p_cantidad
-    WHERE id_producto = p_id_producto;
-
-   
-    COMMIT;
-END;
-/
-
-
------------------------*USUARIO CONTADOR*----------------------------------- 
-
--- **PROCEDIMIENTO: Generar Reporte Financiero Mensual**
---Este procedimiento calcula el total de ventas para un mes y año específicos, genera un nuevo ID para el 
---reporte e inserta los datos en la tabla reportes_financieros.
-
-CREATE OR REPLACE PROCEDURE GENERAR_REPORTE_FINANCIERO (
-    p_mes IN NUMBER,            
-    p_ano IN NUMBER            
-) AS
-    v_total_ventas NUMBER(10, 2); 
-    v_id_reporte NUMBER;      
-BEGIN
-    
-    SELECT NVL(SUM(total), 0) 
-    INTO v_total_ventas
-    FROM usuario_vendedor.factura
-    WHERE EXTRACT(MONTH FROM fecha) = p_mes
-      AND EXTRACT(YEAR FROM fecha) = p_ano;
-
-
-    SELECT NVL(MAX(id_reporte), 0) + 1
-    INTO v_id_reporte
-    FROM reportes_financieros;
-
-   
-    INSERT INTO reportes_financieros (id_reporte, fecha_reporte, total_ventas)
-    VALUES (v_id_reporte, SYSTIMESTAMP, v_total_ventas);
-
-    
-    COMMIT;
-    DBMS_OUTPUT.PUT_LINE('Reporte generado exitosamente con ID: ' || v_id_reporte);
-EXCEPTION
-    WHEN OTHERS THEN
-        
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('Ocurrió un error: ' || SQLERRM);
-END GENERAR_REPORTE_FINANCIERO;
-/
+PROCEDIMIENTO: Actualizar Inventario después de una Venta (Usuario: usuario_vendedor)
+/*Este procedimiento actualiza el inventario cuando se realiza una venta. 
+Realiza lo siguiente:
+1. Verifica si el producto tiene suficiente cantidad en stock para cubrir la venta.
+2. Si hay suficiente inventario, reduce la cantidad en stock del producto 
+registrado en la tabla productos.
+3. Si no hay suficiente inventario, muestra un mensaje de error indicando 
+que no es posible procesar la venta debido a falta de stock.*/
 
 
 
------------------------*USUARIO VENDEDOR*----------------------------------- 
-
--- **PROCEDIMIENTO: Registrar Venta**
-/*Este procedimiento registra una venta en la base de datos. Realiza lo siguiente:
-Verifica si hay suficiente stock disponible para el producto que se está vendiendo.
-Si el stock es suficiente, inserta un nuevo registro en la tabla factura, actualiza la cantidad en stock del producto vendido y confirma la transacción.
-Si no hay suficiente stock, muestra un mensaje de error indicando que el producto no tiene suficiente inventario.*/
 
 
-GRANT INSERT ON factura TO usuario_vendedor;
+PROCEDIMIENTO: Registrar Nueva Sucursal (Usuario: usuario_administrador)
+/*Este procedimiento registra una nueva sucursal en la tabla sucursales. 
+Realiza lo siguiente:
+1. Verifica que la provincia y el teléfono cumplan con los formatos requeridos.
+2. Inserta los datos proporcionados (provincia, dirección, y teléfono) en la tabla sucursales.
+3. Devuelve un mensaje de confirmación si la inserción fue exitosa o un mensaje de 
+error en caso contrario.*/
 
-CREATE OR REPLACE PROCEDURE procRegistrarVenta (
-    rCFactura IN factura%ROWTYPE 
-) AS
-    
-    vStockActual NUMBER;       
-    pudoRegistrar NUMBER := 0; 
-BEGIN
-    
-    SELECT cantidad_en_stock 
-    INTO vStockActual
-    FROM productos
-    WHERE id_producto = rCFactura.id_producto;
 
- 
-    IF vStockActual >= rCFactura.cantidad THEN
-     
-        INSERT INTO factura (
-            id_factura, detalle, cantidad, total, fecha, id_producto, id_cliente, id_metodo_pago, id_sucursal
-        ) VALUES (
-            rCFactura.id_factura, 
-            rCFactura.detalle, 
-            rCFactura.cantidad, 
-            rCFactura.total, 
-            rCFactura.fecha, 
-            rCFactura.id_producto, 
-            rCFactura.id_cliente, 
-            rCFactura.id_metodo_pago, 
-            rCFactura.id_sucursal
-        );
 
-      
-        UPDATE productos
-        SET cantidad_en_stock = cantidad_en_stock - rCFactura.cantidad
-        WHERE id_producto = rCFactura.id_producto;
+PROCEDIMIENTO: Generar Reporte Financiero (Usuario: usuario_contador)
+/*Este procedimiento calcula las ventas totales para una fecha específica y genera 
+un reporte financiero. 
+Realiza lo siguiente:
+1. Consulta la tabla factura para sumar el total de las ventas realizadas en la 
+fecha proporcionada.
+2. Inserta un nuevo registro en la tabla reportes_financieros con la fecha 
+del reporte, total de ventas 
+y otros detalles relevantes.
+3. Devuelve un mensaje confirmando la generación exitosa del reporte.*/
 
-        pudoRegistrar := 1; 
-    END IF;
 
-    IF pudoRegistrar = 0 THEN
-        DBMS_OUTPUT.PUT_LINE('Stock insuficiente para el producto: ' || rCFactura.id_producto);
-    ELSE
-        
-        COMMIT;
-        DBMS_OUTPUT.PUT_LINE('Venta registrada exitosamente con ID: ' || rCFactura.id_factura);
-    END IF;
-END procRegistrarVenta;
-/
+
+
+PROCEDIMIENTO: Registrar Devolución (Usuario: usuario_vendedor)
+/*Este procedimiento registra una devolución en la tabla devoluciones. 
+Realiza lo siguiente:
+1. Inserta un registro con los detalles de la devolución, como el motivo y 
+la fecha, en la tabla devoluciones.
+2. Incrementa la cantidad en stock del producto devuelto en la tabla productos, si aplica.
+3. Devuelve un mensaje confirmando la devolución o indicando errores en el proceso.*/
+
+
+
+
+PROCEDIMIENTO: Asignar Empleados a una Sucursal (Usuario: usuario_administrador)
+/*Este procedimiento asigna un empleado a una sucursal específica. 
+Realiza lo siguiente:
+1. Recibe el id_empleado y el id_sucursal como parámetros.
+2. Actualiza la tabla empleados para asociar el empleado a la sucursal indicada.
+3. Devuelve un mensaje de confirmación o un error si la asignación no es válida (por ejemplo, si la sucursal no existe).*/
+
+
+
+PROCEDIMIENTO: Actualizar Precios de Productos por Categoría (Usuario: usuario_administrador)
+/*Este procedimiento ajusta los precios de los productos pertenecientes a una categoría específica. Realiza lo siguiente:
+1. Recibe como parámetros el id_categoria y un porcentaje de ajuste.
+2. Actualiza el precio de todos los productos en esa categoría según el porcentaje indicado.
+3.Devuelve un mensaje confirmando los cambios realizados o indicando errores (por ejemplo, si la categoría no existe).*/
