@@ -22,6 +22,53 @@ Realiza lo siguiente:
 3. Devuelve un mensaje de confirmación si la inserción fue exitosa o un mensaje de 
 error en caso contrario.*/
 
+-- Asegurarse de estar en la sesión del usuario_administrador
+ALTER SESSION SET CURRENT_SCHEMA = usuario_administrador;
+
+-- Crear el procedimiento para registrar una nueva sucursal
+CREATE OR REPLACE PROCEDURE registrar_nueva_sucursal (
+    p_provincia IN VARCHAR2,
+    p_direccion IN VARCHAR2,
+    p_telefono IN VARCHAR2
+) AS
+    -- Variable para validar el formato del teléfono
+    v_formato_telefono BOOLEAN;
+BEGIN
+    -- Validar que el teléfono tenga un formato válido (solo dígitos y longitud adecuada)
+    v_formato_telefono := REGEXP_LIKE(p_telefono, '^\d{8,15}$');
+    IF NOT v_formato_telefono THEN
+        RAISE_APPLICATION_ERROR(-20001, 'El teléfono debe contener entre 8 y 15 dígitos.');
+    END IF;
+
+    -- Insertar los datos en la tabla sucursales
+    INSERT INTO sucursales (id_sucursal, provincia, direccion, telefono)
+    VALUES (
+        SEQ_SUCURSALES.NEXTVAL, -- Asumiendo que existe una secuencia para ID
+        p_provincia,
+        p_direccion,
+        p_telefono
+    );
+
+    -- Confirmar el registro exitoso
+    DBMS_OUTPUT.PUT_LINE('Sucursal registrada exitosamente.');
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Manejo de errores: devolver un mensaje en caso de fallo
+        RAISE_APPLICATION_ERROR(-20002, 'Error al registrar la sucursal: ' || SQLERRM);
+END registrar_nueva_sucursal;
+/
+
+--Prueba de procedimiento BEGIN
+    registrar_nueva_sucursal(
+        p_provincia => 'Guayas',
+        p_direccion => 'Av. Principal 123',
+        p_telefono  => '0987654321'
+    );
+END;
+/
+
+
+
 
 
 PROCEDIMIENTO: Generar Reporte Financiero (Usuario: usuario_contador)
@@ -63,3 +110,49 @@ PROCEDIMIENTO: Actualizar Precios de Productos por Categoría (Usuario: usuario_
 1. Recibe como parámetros el id_categoria y un porcentaje de ajuste.
 2. Actualiza el precio de todos los productos en esa categoría según el porcentaje indicado.
 3.Devuelve un mensaje confirmando los cambios realizados o indicando errores (por ejemplo, si la categoría no existe).*/
+
+-- Asegurarse de estar en la sesión del usuario_administrador
+ALTER SESSION SET CURRENT_SCHEMA = usuario_administrador;
+
+-- Crear el procedimiento para registrar una nueva sucursal
+CREATE OR REPLACE PROCEDURE registrar_nueva_sucursal (
+    p_provincia IN VARCHAR2,
+    p_direccion IN VARCHAR2,
+    p_telefono IN VARCHAR2
+) AS
+    -- Variable para validar el formato del teléfono
+    v_formato_telefono BOOLEAN;
+BEGIN
+    -- Validar que el teléfono tenga un formato válido (solo dígitos y longitud adecuada)
+    v_formato_telefono := REGEXP_LIKE(p_telefono, '^\d{8,15}$');
+    IF NOT v_formato_telefono THEN
+        RAISE_APPLICATION_ERROR(-20001, 'El teléfono debe contener entre 8 y 15 dígitos.');
+    END IF;
+
+    -- Insertar los datos en la tabla sucursales
+    INSERT INTO sucursales (id_sucursal, provincia, direccion, telefono)
+    VALUES (
+        SEQ_SUCURSALES.NEXTVAL, -- Asumiendo que existe una secuencia para ID
+        p_provincia,
+        p_direccion,
+        p_telefono
+    );
+
+    -- Confirmar el registro exitoso
+    DBMS_OUTPUT.PUT_LINE('Sucursal registrada exitosamente.');
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Manejo de errores: devolver un mensaje en caso de fallo
+        RAISE_APPLICATION_ERROR(-20002, 'Error al registrar la sucursal: ' || SQLERRM);
+END registrar_nueva_sucursal;
+/
+
+
+BEGIN
+    registrar_nueva_sucursal(
+        p_provincia => 'Alajuela',
+        p_direccion => 'San Antonio',
+        p_telefono  => '12345'
+    );
+END;
+/
