@@ -1,6 +1,6 @@
 alter session set "_oracle_script"=true;
 CREATE ROLE ADMIN_ROL;
-
+--creacion de roles para cada usuario
 -- Permitir crear y administrar funciones, procedimientos y triggers
 GRANT CREATE PROCEDURE TO ADMIN_ROL;
 GRANT CREATE TRIGGER TO ADMIN_ROL;
