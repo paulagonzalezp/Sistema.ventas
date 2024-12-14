@@ -1,11 +1,5 @@
 -----------------------*PROCEDIMIENTOS*----------------------------------- 
 
-
-
-
-
-
-
 PROCEDIMIENTO: Registrar Nueva Sucursal (Usuario: usuario_administrador) (Paula)
 /*Este procedimiento registra una nueva sucursal en la tabla sucursales. 
 Realiza lo siguiente:
@@ -61,8 +55,6 @@ END;
 
 
 
-
-
 PROCEDIMIENTO: Generar Reporte Financiero (Usuario: usuario_contador)
 /*Este procedimiento calcula las ventas totales para una fecha específica y genera 
 un reporte financiero. 
@@ -77,7 +69,7 @@ y otros detalles relevantes.
 
 
 
-PROCEDIMIENTO: Registrar Devolución (Usuario: usuario_vendedor)
+PROCEDIMIENTO: Registrar Devolución (Usuario: usuario_vendedor)(Maricruz)
 /*Este procedimiento registra una devolución en la tabla devoluciones. 
 Realiza lo siguiente:
 1. Inserta un registro con los detalles de la devolución, como el motivo y 
@@ -85,10 +77,91 @@ la fecha, en la tabla devoluciones.
 2. Incrementa la cantidad en stock del producto devuelto en la tabla productos, si aplica.
 3. Devuelve un mensaje confirmando la devolución o indicando errores en el proceso.*/
 
+--Dar este permiso desde system
+GRANT CREATE SEQUENCE TO usuario_vendedor;
+
+-- Asegurarse de estar en la sesión del usuario_vendedor
+ALTER SESSION SET CURRENT_SCHEMA = usuario_vendedor;
+
+--crear esta secuencia primero para poder utilizar bien el PA
+CREATE SEQUENCE devoluciones_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE;
+
+--PA: 
+CREATE OR REPLACE PROCEDURE RegistrarDevolucion (
+    p_id_factura IN NUMBER,
+    p_motivo IN VARCHAR2
+)
+IS
+    v_id_producto NUMBER;
+    v_cantidad NUMBER;
+    v_total_devolucion NUMBER;
+    v_stock_actual NUMBER;
+BEGIN
+    SELECT f.id_producto, f.cantidad, f.total
+    INTO v_id_producto, v_cantidad, v_total_devolucion
+    FROM factura f
+    WHERE f.id_factura = p_id_factura;
+    
+    INSERT INTO devoluciones (
+        id_devolucion,
+        motivo,
+        fecha_devolucion,
+        id_factura
+    )
+    VALUES (
+        devoluciones_seq.NEXTVAL, 
+        p_motivo,
+        SYSTIMESTAMP,
+        p_id_factura
+    );
+    
+    SELECT p.cantidad_en_stock
+    INTO v_stock_actual
+    FROM usuario_administrador.productos p
+    WHERE p.id_producto = v_id_producto;
+    
+    UPDATE usuario_administrador.productos
+    SET cantidad_en_stock = v_stock_actual + v_cantidad
+    WHERE id_producto = v_id_producto;
+    
+    DBMS_OUTPUT.PUT_LINE('Devolución registrada correctamente para la factura ' || p_id_factura || '. Producto: ' || v_id_producto || '. Cantidad devuelta: ' || v_cantidad);
+    
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: No se encontró la factura con ID ' || p_id_factura);
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error al registrar la devolución: ' || SQLERRM);
+END RegistrarDevolucion;
+
+--inserts en la tabla factura para poder visualizar el PA
+INSERT INTO factura (id_factura, detalle, cantidad, total, fecha, id_producto, id_cliente, id_metodo_pago, id_sucursal)
+VALUES (1, 'Factura de prueba', 2, 100.00, CURRENT_TIMESTAMP, 1, 1, 1, 1);
+
+INSERT INTO factura (id_factura, detalle, cantidad, total, fecha, id_producto, id_cliente, id_metodo_pago, id_sucursal)
+VALUES (2, 'Factura de prueba 2', 3, 150.00, CURRENT_TIMESTAMP, 2, 2, 2, 2);
+
+INSERT INTO factura (id_factura, detalle, cantidad, total, fecha, id_producto, id_cliente, id_metodo_pago, id_sucursal)
+VALUES (3, 'Factura de prueba 3', 1, 50.00, CURRENT_TIMESTAMP, 3, 3, 3, 3);
 
 
+--ejecutar el PA
+BEGIN
+    REGISTRARDEVOLUCION(
+        p_motivo => 'Producto defectuoso', 
+        p_id_factura => 1
+    );
+END;
+/
 
-PROCEDIMIENTO: Asignar Empleados a una Sucursal (Usuario: usuario_administrador)
+--Select en devoluciones
+select * from devoluciones
+--se deberia de ver el nuevo dato de "producto defectuoso"
+
+
+PROCEDIMIENTO: Asignar Empleados a una Sucursal (Usuario: usuario_administrador)(Maricruz)
 /*Este procedimiento asigna un empleado a una sucursal específica. 
 Realiza lo siguiente:
 1. Recibe el id_empleado y el id_sucursal como parámetros.
