@@ -1,14 +1,6 @@
 -----------------------*PROCEDIMIENTOS*----------------------------------- 
 
 
-PROCEDIMIENTO: Actualizar Inventario después de una Venta (Usuario: usuario_vendedor)
-/*Este procedimiento actualiza el inventario cuando se realiza una venta. 
-Realiza lo siguiente:
-1. Verifica si el producto tiene suficiente cantidad en stock para cubrir la venta.
-2. Si hay suficiente inventario, reduce la cantidad en stock del producto 
-registrado en la tabla productos.
-3. Si no hay suficiente inventario, muestra un mensaje de error indicando 
-que no es posible procesar la venta debido a falta de stock.*/
 
 
 

@@ -119,12 +119,41 @@ Realiza lo siguiente:
 
 
 
-FUNCIÓN: Calcular el Monto Promedio de Devoluciones (Usuario: usuario_contador)
-/*Esta función calcula el monto promedio de las devoluciones. 
-Realiza lo siguiente:
-1.Consulta la tabla devoluciones y las facturas asociadas en la tabla factura para calcular los totales devueltos.
-2. Calcula el promedio dividiendo el monto total de devoluciones entre el número de devoluciones registradas.
-3. Retorna el promedio como un valor numérico.*/
+FUNCIÓN: actualizar_stock_producto (Usuario: usuario_administrador)
+/* La función actualizar_stock_producto permite actualizar 
+la cantidad en inventario de un producto específico en la tabla inventario.
+ Recibe como parámetros el identificador del producto (p_id_producto) 
+y la nueva cantidad (p_nueva_cantidad). 
+Verifica si el producto existe antes de actualizar el stock, devolviendo un mensaje de confirmación 
+en caso de éxito o un mensaje de error si el producto no se encuentra o ocurre algún problema durante 
+el proceso.*/
+CREATE OR REPLACE FUNCTION actualizar_stock_producto(
+    p_id_producto NUMBER,
+    p_nueva_cantidad NUMBER
+) RETURN VARCHAR2 IS
+    v_stock_actual NUMBER;
+BEGIN
+    -- Validar que el producto exista
+    SELECT cantidad
+    INTO v_stock_actual
+    FROM usuario_administrador.inventario
+    WHERE id_producto = p_id_producto;
+
+    -- Actualizar el stock del producto
+    UPDATE usuario_administrador.inventario
+    SET cantidad = p_nueva_cantidad
+    WHERE id_producto = p_id_producto;
+
+    RETURN 'Stock actualizado correctamente';
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'Error: Producto no encontrado';
+    WHEN OTHERS THEN
+        RETURN 'Error: No se pudo actualizar el stock';
+END actualizar_stock_producto;
+/
+
+SELECT actualizar_stock_producto(101, 50) FROM dual;
 
 
 
@@ -134,6 +163,40 @@ Realiza lo siguiente:
 1. Recibe como parámetro el id_producto.
 2. Consulta las tablas factura y productos para calcular la diferencia entre el precio de venta y los costos asociados.
 3. Retorna el monto total de ganancia generado por el producto.*/
+--SE LE ASIGNO ESTE PERMISO ADICIONAL AL ADMIN_ROLE
+--DESDE USUARIO_VENDEDOR
+GRANT SELECT ON usuario_vendedor.factura TO ADMIN_ROL;
+--DESDE USUARIO_ADMINISTRADOR SE CREA LA FUNCION 
+CREATE OR REPLACE FUNCTION evaluar_rentabilidad_producto(id_producto_param NUMBER)
+RETURN NUMBER
+IS
+    ganancia_total NUMBER := 0;
+BEGIN
+    -- Calcular la ganancia total para el producto especificado
+    SELECT SUM((p.precio - p.monto) * f.cantidad)
+    INTO ganancia_total
+    FROM productos p
+    JOIN usuario_vendedor.factura f
+    ON p.id_producto = f.id_producto
+    WHERE p.id_producto = id_producto_param;
+
+    RETURN ganancia_total;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- Si no hay registros, retornar 0
+        RETURN 0;
+    WHEN OTHERS THEN
+        -- Manejo de otros errores
+        RAISE;
+END;
+/
+
+
+--ASEGURAMOS DE QUE ADMIN_ROLE tenga el permiso EXECUTE sobre la función
+GRANT EXECUTE ON evaluar_rentabilidad_producto TO ADMIN_ROL;
+--PRUEBA
+SELECT usuario_administrador.evaluar_rentabilidad_producto(101) AS ganancia_total
+FROM dual;
 
 
 
