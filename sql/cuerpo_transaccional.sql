@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE ActualizarInventario (
+CREATE OR REPLACE PROCEDURE ActualizarInventario ( 
     vIdPeticion IN NUMBER,
     vIdProducto IN NUMBER,
     vCantidadPorComprar IN NUMBER
@@ -40,6 +40,10 @@ BEGIN
             SET cantidad_en_stock = cantidad_en_stock - vCantidadPendiente
             WHERE id_producto = vIdProducto;
 
+            -- Registrar la compra en la tabla de compras
+            INSERT INTO usuario_vendedor.Compras (idPeticion, idProducto, cantidadPorCompar, estado)
+            VALUES (vIdPeticion, vIdProducto, vCantidadPendiente, 1);  -- Estado 1: Compra exitosa
+
             -- Actualizan las variables de control
             vCantidadEntregada := vCantidadEntregada + vCantidadPendiente;
             vCantidadPendiente := 0;
@@ -49,6 +53,10 @@ BEGIN
             UPDATE usuario_administrador.productos
             SET cantidad_en_stock = 0
             WHERE id_producto = vIdProducto;
+
+            -- Registrar la compra parcial en la tabla de compras
+            INSERT INTO usuario_vendedor.Compras (idPeticion, idProducto, cantidadPorCompar, estado)
+            VALUES (vIdPeticion, vIdProducto, rCProductos.cantidad_en_stock, 1);  -- Estado 1: Compra exitosa
 
             -- Actualizan las variables de control
             vCantidadEntregada := vCantidadEntregada + rCProductos.cantidad_en_stock;
@@ -65,7 +73,7 @@ BEGIN
 
     CLOSE cProductos;
 
-    -- Registrar la cantidad faltante en la tabla Rechazos
+    -- Registrar la cantidad faltante en la tabla Rechazos si es necesario
     IF vCantidadEntregada < vCantidadPorComprar THEN
         INSERT INTO usuario_vendedor.Rechazos (idPeticion, idProducto, cantidadSolicitada, cantidadRechazada)
         VALUES (vIdPeticion, vIdProducto, vCantidadPorComprar, vCantidadPendiente);
