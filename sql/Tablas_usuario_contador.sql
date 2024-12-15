@@ -33,3 +33,6 @@ CREATE TABLE reportes_financieros (
 GRANT REFERENCES ON clientes TO usuario_vendedor;
 GRANT REFERENCES ON clientes TO usuario_administrador;
 
+--Permisos para usuario_general
+GRANT INSERT,SELECT ON clientes TO usuario_general;
+GRANT UPDATE, DELETE ON clientes TO usuario_general;
