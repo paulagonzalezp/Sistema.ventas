@@ -52,5 +52,21 @@ GRANT REFERENCES ON factura TO usuario_administrador;
 GRANT REFERENCES ON factura TO usuario_contador;
 GRANT REFERENCES ON devoluciones TO usuario_contador;
 
+CREATE TABLE Compras (
+	idPeticion number constraint pk_compras primary key, 
+	idProducto number,
+	cantidadPorCompar number,
+	estado number);
+    
+    
+CREATE TABLE Rechazos (
+idPeticion number,
+idProducto number,
+cantidadSolicitada number,
+cantidadRechazada number);
 
+-- Permisos para la tabla 'compras' en el esquema 'usuario_vendedor'
+GRANT SELECT, INSERT, UPDATE ON usuario_vendedor.Compras TO transact_user;
 
+-- Permisos para la tabla 'rechazos' en el esquema 'usuario_vendedor'
+GRANT SELECT, INSERT ON usuario_vendedor.Rechazos TO transact_user;

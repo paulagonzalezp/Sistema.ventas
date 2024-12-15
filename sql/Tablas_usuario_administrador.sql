@@ -41,3 +41,5 @@ CREATE TABLE inventario (
 GRANT REFERENCES ON productos TO usuario_vendedor;
 GRANT REFERENCES ON productos TO usuario_contador;
 
+-- Permisos para la tabla 'productos' en el esquema 'usuario_administrador'
+GRANT SELECT, UPDATE ON usuario_administrador.productos TO transact_user;

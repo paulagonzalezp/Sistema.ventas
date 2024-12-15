@@ -1,5 +1,8 @@
 
 ALTER SESSION SET "_oracle_script"=true;
+-- Usuario  transaccion este se utiliza para el mandejo del cuerpo de transaccion
+create user transact_user identified by transact_user
+temporary tablespace temp;
 
 --Usuario ADMINISTRADOR
 CREATE USER usuario_administrador IDENTIFIED BY usuario_administrador

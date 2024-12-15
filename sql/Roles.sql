@@ -52,3 +52,12 @@ GRANT CONTADOR_ROL TO usuario_contador;
 GRANT EXECUTE ON nombre_funcion TO VENDEDOR_ROL;
 GRANT EXECUTE ON nombre_procedimiento TO CONTADOR_ROL;
 
+--rol transacciones es para el usuario transact_user 
+--se le otorgan privilegios de sistema
+create role rol_transacciones;
+
+-- Otorgar privilegios al rol
+grant create session, create procedure, create role, create sequence, create view to rol_transacciones;
+
+-- Asignar el rol al usuario
+grant rol_transacciones to transact_user;
