@@ -14,11 +14,10 @@ function AbrirBaseDatos()
     try{
         $conexion=new PDO($dsn, $user, $passwrod);
         $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        echo "Conexión exitosa";
+        return $conexion;
     }catch (PDOException $e){
         echo "No se estableció la conexión: ".$e->getMessage();
     }
-        return $conexion;
     }
 
 function CerrarBaseDatos($conexion)
