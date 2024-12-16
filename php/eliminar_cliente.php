@@ -104,8 +104,11 @@ if (isset($_GET['id'])) {
     </div>
 
     <form action="eliminar_cliente.php?id=<?php echo $cliente['ID_CLIENTE']; ?>" method="POST">
-        <button type="submit" class="btn btn-danger">Eliminar Cliente</button>
-    </form>
+  
+        <a href="index_clientes.php" class="btn btn-primary btn-sm me-2">Cancelar</a>
+        <button type="submit" class="btn btn-danger  btn-sm">Eliminar Cliente</button>
+</form>
+  
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

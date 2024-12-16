@@ -63,10 +63,16 @@ CerrarBaseDatos($conexion);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Actualizar Cliente</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilo para separar el título del borde */
+        .titulo-actualizar-cliente {
+            margin-top: 40px; /* Ajusta el valor según lo que necesites */
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h2 class="text-center mb-4">Actualizar Cliente</h2>
+    <h2 class="text-center mb-4 titulo-actualizar-cliente">Actualizar Cliente</h2>
     <div class="card shadow">
         <div class="card-body">
             <form action="actualizar_cliente.php?id=<?php echo $cliente['ID_CLIENTE']; ?>" method="POST">
@@ -87,9 +93,8 @@ CerrarBaseDatos($conexion);
                     <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($cliente['EMAIL']); ?>" required>
                 </div>
                 <div class="d-flex justify-left">
-                <a href="index_clientes.php" class="btn btn-primary btn-sm me-2">Cancelar</a>
+                    <a href="index_clientes.php" class="btn btn-primary btn-sm me-2">Cancelar</a>
                     <button type="submit" class="btn btn-success btn-sm">Actualizar</button>
-                   
                 </div>
             </form>
         </div>

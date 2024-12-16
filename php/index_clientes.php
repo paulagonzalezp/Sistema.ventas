@@ -21,12 +21,17 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listado de Clientes</title>
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style/style.css">
+    <style>
+        .titulo-lista-clientes {
+            margin-top: 40px;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h2 class="text-center mb-4">Listado de Clientes</h2>
+    <h2 class="text-center mb-4 titulo-lista-clientes">Listado de Clientes</h2>
     <div class="d-flex justify-content-between mb-4">
         <a href="formulario_clientes.php" class="btn btn-success">Registrar un nuevo cliente</a>
     </div>
