@@ -1,0 +1,68 @@
+/* Fondo general */
+body {
+    background-image: url('../images/fondo.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Contenedor del formulario */
+.form-container {
+    background-color: rgba(0, 0, 0, 0.85); /* Fondo oscuro con transparencia */
+    padding: 40px 30px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+}
+
+/* Estilo para el título */
+.form-container h2 {
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #32cd32; /* Verde */
+    border-bottom: 2px solid #32cd32;
+    display: inline-block;
+}
+
+/* Estilos para los inputs */
+.form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Estilo para los botones */
+.btn-success {
+    background-color: #32cd32; /* Verde */
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #28a428;
+}
+
+.btn-light {
+    background-color: #fff;
+    color: #000;
+    border: none;
+}
+
+.btn-light:hover {
+    background-color: #e0e0e0;
+}
+

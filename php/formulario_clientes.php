@@ -50,27 +50,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario Cliente</title>
+    <title>Registro Cliente</title>
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
-    <h1>Registrar Cliente</h1>
-    <form action="" method="POST"> <!-- La acción está vacía, procesa en este mismo archivo -->
-        <label for="id_cliente">ID Cliente:</label><br>
-        <input type="number" id="id_cliente" name="id_cliente" required><br><br>
-
-        <label for="nombre">Nombre:</label><br>
-        <input type="text" id="nombre" name="nombre" required><br><br>
-
-        <label for="telefono">Teléfono:</label><br>
-        <input type="text" id="telefono" name="telefono" required><br><br>
-
-        <label for="direccion">Dirección:</label><br>
-        <input type="text" id="direccion" name="direccion" required><br><br>
-
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br><br>
-
-        <button type="submit">Registrar Cliente</button>
-    </form>
+    <div class="container">
+        <div class="form-container">
+            <h2 class="text-center">Registro de Clientes</h2>
+            <form action="" method="POST">
+                <div class="mb-3">
+                    <label for="id_cliente" class="form-label">ID Cliente</label>
+                    <input type="number" id="id_cliente" name="id_cliente" class="form-control" placeholder="Ingrese ID" required>
+                </div>
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Ingrese nombre" required>
+                </div>
+                <div class="mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input type="text" id="telefono" name="telefono" class="form-control" placeholder="Ingrese teléfono" required>
+                </div>
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input type="text" id="direccion" name="direccion" class="form-control" placeholder="Ingrese dirección" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Ingrese email" required>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success me-2">Registrar</button>
+                    
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
+
